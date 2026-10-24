@@ -1,0 +1,32 @@
+1. c(n), Equation 1
+PASS  c(1) = 0
+PASS  c(2) = 1
+PASS  c(256) = 10.2487 equals 2 H(255) - 2*255/256 with exact H
+      (with the paper's estimate H(i) = ln(i) + 0.5772: c(256) = 10.2448)
+
+2. Tree structure, Algorithm 2 (psi = 256, l = 8, 200 trees on Satellite)
+PASS  external-node sizes add up to psi in every tree
+PASS  every tree has at most 2 psi - 1 = 511 nodes
+PASS  no node is deeper than the height limit l = ceiling(log2 psi) = 8
+PASS  every internal node has exactly two children one level deeper
+PASS  routing the sub-sample down the tree reproduces the stored node sizes
+
+3. Fully grown trees (no height limit) on 300 distinct points
+PASS  n = 300 external nodes and n - 1 = 299 internal nodes (2n - 1 in total)
+PASS  every external node holds one instance
+
+4. Figure 1 style example: 135 Gaussian points plus one far point, 1000 trees
+      E[h] of the far point 2.68, of the most central point 12.45
+PASS  the anomaly has the shorter average path
+PASS  score of far point 0.81 > 0.6, central point 0.38 < 0.5
+
+5. Agreement with scikit-learn's IsolationForest (psi = 256)
+   Expected path lengths with 2000 trees each, so that tree-to-tree randomness averages out:
+   mammography  Spearman rho = 0.9995, mean |s_ours - s_sklearn| = 0.0016, AUC ours 0.8632 vs sklearn 0.8632
+PASS  mammography: rankings agree (rho > 0.99)
+   satellite    Spearman rho = 0.9962, mean |s_ours - s_sklearn| = 0.0025, AUC ours 0.7041 vs sklearn 0.6987
+PASS  satellite: rankings agree (rho > 0.99)
+   arrhythmia   Spearman rho = 0.9954, mean |s_ours - s_sklearn| = 0.0020, AUC ours 0.8091 vs sklearn 0.8072
+PASS  arrhythmia: rankings agree (rho > 0.99)
+
+ALL CHECKS PASSED
