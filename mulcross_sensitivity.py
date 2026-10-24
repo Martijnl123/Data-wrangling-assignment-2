@@ -1,20 +1,17 @@
 """
 Two checks on Mulcross, the data set where masking matters most.
 
-1. The OpenML file (data/mulcross.arff): our iForest with t = 100 and
+1. The OpenML file (data/mulcross.arff): my iForest with t = 100 and
    subsample sizes psi from 32 to 2048, ten runs each. Writes
    results/mulcross_psi.csv.
 2. Mulcross regenerated from the paper's description alone, with different
    anomaly-cluster widths and two readings of "distance factor = 2", scored by
-   our iForest (ten runs) and the exact ORCA score. Writes
+   my iForest (ten runs) and the ORCA-style k-NN score (baselines.py). Writes
    results/mulcross_sensitivity.csv.
 
     python mulcross_sensitivity.py
 """
-import os
-
-for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
-    os.environ.setdefault(_var, "1")
+import single_thread  # sets the thread variables before NumPy loads
 
 from pathlib import Path
 
@@ -27,12 +24,14 @@ import datasets
 from datasets import make_mulcross
 from iforest import IsolationForest
 
+single_thread.limit()
 OUT = Path(__file__).resolve().parent / "results"
 OUT.mkdir(exist_ok=True)
 
 
 def iforest_aucs(X, y, psi=256, runs=10):
-    return [roc_auc_score(y, IsolationForest(100, psi, "varying", s).fit(X).score(X))
+    return [roc_auc_score(y, IsolationForest(n_trees=100, subsample_size=psi,
+                                             random_state=s).fit(X).score(X))
             for s in range(runs)]
 
 
@@ -59,9 +58,9 @@ rows = []
 for label, shift, sd in SETTINGS:
     X, y = make_mulcross(distance_factor=shift, cluster_std=sd)
     aucs = iforest_aucs(X, y)
-    orca = roc_auc_score(y, baselines.orca_scores(X, 5, None))
+    orca = roc_auc_score(y, baselines.orca_style_scores(X, 5, None))
     rows.append({"setting": label, "iforest_auc_mean": np.mean(aucs),
-                 "iforest_auc_sd": np.std(aucs, ddof=1), "orca_auc": orca})
-    print(f"{label:70s} iForest {np.mean(aucs):.3f} +/- {np.std(aucs, ddof=1):.3f}   ORCA {orca:.3f}",
-          flush=True)
+                 "iforest_auc_sd": np.std(aucs, ddof=1), "orca_style_auc": orca})
+    print(f"{label:70s} iForest {np.mean(aucs):.3f} +/- {np.std(aucs, ddof=1):.3f}"
+          f"   ORCA-style k-NN {orca:.3f}", flush=True)
 pd.DataFrame(rows).to_csv(OUT / "mulcross_sensitivity.csv", index=False, float_format="%.4f")

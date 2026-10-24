@@ -6,4 +6,11 @@ numpy: 2.5.3
 scipy: 1.18.1
 scikit-learn: 1.9.1
 pandas: 3.0.5
-threads: 1 (OMP/OPENBLAS/MKL_NUM_THREADS=1, n_jobs=1)
+runs per randomised method: 10 (seeds 0-9)
+timing repeats per deterministic method: 3
+scikit-learn n_jobs: 1
+thread pools at run time (threadpoolctl):
+  openmp (openmp, libgomp-e985bcbb.so.1.0.0): 1 thread(s)
+  openblas (blas, libscipy_openblas-5f890258.so): 1 thread(s)
+  openblas (blas, libscipy_openblas64_-f48b354e.so): 1 thread(s)
+largest thread count of any pool: 1

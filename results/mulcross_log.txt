@@ -4,9 +4,9 @@ OpenML Mulcross, psi =   128: iForest 0.977 +/- 0.007
 OpenML Mulcross, psi =   256: iForest 0.957 +/- 0.009
 OpenML Mulcross, psi =   512: iForest 0.938 +/- 0.014
 OpenML Mulcross, psi =  2048: iForest 0.899 +/- 0.016
-shift 2 per attribute, cluster sd 0.15 (first regeneration)            iForest 0.902 +/- 0.012   ORCA 0.014
-shift 2 per attribute, cluster sd 0.3                                  iForest 0.948 +/- 0.005   ORCA 0.161
-shift 2 per attribute, cluster sd 0.5                                  iForest 0.964 +/- 0.005   ORCA 0.522
-shift 2 per attribute, cluster sd 1.0                                  iForest 0.970 +/- 0.002   ORCA 0.907
-centre distance 2 in total (shift 1 per attribute), cluster sd 0.15    iForest 0.351 +/- 0.026   ORCA 0.011
+shift 2 per attribute, cluster sd 0.15 (first regeneration)            iForest 0.902 +/- 0.012   ORCA-style k-NN 0.014
+shift 2 per attribute, cluster sd 0.3                                  iForest 0.948 +/- 0.005   ORCA-style k-NN 0.161
+shift 2 per attribute, cluster sd 0.5                                  iForest 0.964 +/- 0.005   ORCA-style k-NN 0.522
+shift 2 per attribute, cluster sd 1.0                                  iForest 0.970 +/- 0.002   ORCA-style k-NN 0.907
+centre distance 2 in total (shift 1 per attribute), cluster sd 0.15    iForest 0.351 +/- 0.026   ORCA-style k-NN 0.011
 exit 0

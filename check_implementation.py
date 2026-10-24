@@ -1,13 +1,11 @@
 """
 Checks that iforest.py does what the paper describes, and that it agrees with
-scikit-learn's IsolationForest. Writes results/implementation_checks.txt.
+scikit-learn's IsolationForest. Writes results/implementation_checks.txt and
+exits with status 1 if any check fails.
 
     python check_implementation.py
 """
-import os
-
-for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
-    os.environ.setdefault(_var, "1")
+import single_thread  # sets the thread variables before NumPy loads
 
 import math
 from pathlib import Path
@@ -20,6 +18,7 @@ from sklearn.metrics import roc_auc_score
 import datasets
 from iforest import IsolationForest, _build_itree, average_path_length
 
+single_thread.limit()
 OUT = Path(__file__).resolve().parent / "results"
 lines = []
 
@@ -45,7 +44,9 @@ c256 = 2 * h255 - 2 * 255 / 256
 all_ok &= check(abs(average_path_length(256) - c256) < 1e-9,
                 f"c(256) = {average_path_length(256):.4f} equals 2 H(255) - 2*255/256 with exact H")
 approx = 2 * (math.log(255) + 0.5772156649) - 2 * 255 / 256
-report(f"      (with the paper's estimate H(i) = ln(i) + 0.5772: c(256) = {approx:.4f})")
+all_ok &= check(abs(average_path_length(256, "approx") - approx) < 1e-9,
+                f"harmonic='approx' uses the paper's estimate H(i) = ln(i) + 0.5772: "
+                f"c(256) = {approx:.4f}")
 
 # 2. Structure of single trees (Algorithm 2)
 report("\n2. Tree structure, Algorithm 2 (psi = 256, l = 8, 200 trees on Satellite)")
@@ -110,6 +111,32 @@ for name in ["mammography", "satellite", "arrhythmia"]:
            f"AUC ours {roc_auc_score(y, s_ours):.4f} vs sklearn {roc_auc_score(y, s_sk):.4f}")
     all_ok &= check(rho > 0.99, f"{name}: rankings agree (rho > 0.99)")
 
+# 6. Input the method is not defined for is rejected instead of giving NaN scores
+report("\n6. Input validation")
+
+
+def raises_value_error(fn):
+    try:
+        fn()
+    except ValueError:
+        return True
+    return False
+
+
+Z = np.random.default_rng(5).standard_normal((50, 3))
+Z_nan = Z.copy()
+Z_nan[7, 1] = np.nan
+all_ok &= check(raises_value_error(lambda: IsolationForest(random_state=0).fit(Z[:1])),
+                "training on a single instance raises ValueError")
+all_ok &= check(raises_value_error(lambda: IsolationForest(n_trees=0).fit(Z)),
+                "n_trees = 0 raises ValueError")
+all_ok &= check(raises_value_error(lambda: IsolationForest(random_state=0).fit(Z_nan)),
+                "a missing value (NaN) in the training data raises ValueError")
+fitted = IsolationForest(n_trees=10, random_state=0).fit(Z)
+all_ok &= check(raises_value_error(lambda: fitted.score(Z[:, :2])),
+                "scoring data with a different number of attributes raises ValueError")
+
 report("\nALL CHECKS PASSED" if all_ok else "\nSOME CHECKS FAILED")
 OUT.mkdir(exist_ok=True)
 (OUT / "implementation_checks.txt").write_text("\n".join(lines) + "\n")
+raise SystemExit(0 if all_ok else 1)

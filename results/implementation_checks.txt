@@ -2,7 +2,7 @@
 PASS  c(1) = 0
 PASS  c(2) = 1
 PASS  c(256) = 10.2487 equals 2 H(255) - 2*255/256 with exact H
-      (with the paper's estimate H(i) = ln(i) + 0.5772: c(256) = 10.2448)
+PASS  harmonic='approx' uses the paper's estimate H(i) = ln(i) + 0.5772: c(256) = 10.2448
 
 2. Tree structure, Algorithm 2 (psi = 256, l = 8, 200 trees on Satellite)
 PASS  external-node sizes add up to psi in every tree
@@ -28,5 +28,11 @@ PASS  mammography: rankings agree (rho > 0.99)
 PASS  satellite: rankings agree (rho > 0.99)
    arrhythmia   Spearman rho = 0.9954, mean |s_ours - s_sklearn| = 0.0020, AUC ours 0.8091 vs sklearn 0.8072
 PASS  arrhythmia: rankings agree (rho > 0.99)
+
+6. Input validation
+PASS  training on a single instance raises ValueError
+PASS  n_trees = 0 raises ValueError
+PASS  a missing value (NaN) in the training data raises ValueError
+PASS  scoring data with a different number of attributes raises ValueError
 
 ALL CHECKS PASSED

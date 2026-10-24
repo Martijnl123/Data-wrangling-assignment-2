@@ -106,4 +106,5 @@ def load(name, data_dir=DATA_DIR):
 
 def describe(name, X, y):
     return {"dataset": name, "n": X.shape[0], "d": X.shape[1],
-            "anomalies": int(y.sum()), "anomaly_pct": round(100 * y.mean(), 2)}
+            "anomalies": int(y.sum()), "anomaly_pct": round(100 * y.mean(), 2),
+            "distinct_rows": int(np.unique(X, axis=0).shape[0])}

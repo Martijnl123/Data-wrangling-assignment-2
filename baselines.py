@@ -2,14 +2,19 @@
 The three competitors of Table 3, rebuilt with scikit-learn.
 
 * LOF  - scikit-learn's LocalOutlierFactor with k = 10, as in the paper.
-* ORCA - ORCA itself is a C++ program that is not available in Python. Its
-         score is computed exactly instead: the average distance to the k = 5
-         nearest neighbours, after scaling every attribute to [0, 1] (our
-         assumption for ORCA's dprep step). ORCA's pruning only speeds up the
-         search for the top N points, so an exact k-NN search ranks the same
-         top N. With n_reported=None every point keeps its score (full
-         ranking); with n_reported=N only the top N keep their score, as in
-         ORCA's output, and the rest share one tied lowest score.
+* ORCA-style k-NN score - ORCA itself (Bay and Schwabacher, 2003) is a C++
+         program that is not available in Python, so this is not ORCA. It
+         computes a k-NN score of the kind ORCA uses, exactly: the average
+         distance to the k = 5 nearest neighbours (the paper uses ORCA's
+         default k = 5), after scaling every attribute to [0, 1] (my
+         assumption for ORCA's preprocessing). If ORCA's score, distance and
+         scaling match these assumptions, its pruning should not change which
+         points it reports. The running time says nothing about ORCA's: ORCA
+         stops the neighbour search for a point as soon as that point cannot
+         be among the top N, while this code finds all k neighbours of every
+         point with a k-d tree. With n_reported=None every point keeps its
+         score (full ranking); with n_reported=N only the top N keep their
+         score, as in ORCA's output, and the rest share one tied lowest score.
 * RF   - unsupervised Random Forests following Shi and Horvath (2006): a
          synthetic class drawn uniformly between each attribute's minimum and
          maximum, a 100-tree forest separating real from synthetic points,
@@ -50,7 +55,8 @@ def keep_top(score, n_reported):
     return out
 
 
-def orca_scores(X, k=5, n_reported=None):
+def orca_style_scores(X, k=5, n_reported=None):
+    """ORCA-style k-NN score, see the module docstring."""
     score = knn_average_distance(X, k)
     return score if n_reported is None else keep_top(score, n_reported)
 

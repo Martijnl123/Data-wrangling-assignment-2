@@ -1,4 +1,4 @@
-setting,iforest_auc_mean,iforest_auc_sd,orca_auc
+setting,iforest_auc_mean,iforest_auc_sd,orca_style_auc
 "shift 2 per attribute, cluster sd 0.15 (first regeneration)",0.9017,0.0116,0.0141
 "shift 2 per attribute, cluster sd 0.3",0.9476,0.0050,0.1607
 "shift 2 per attribute, cluster sd 0.5",0.9645,0.0051,0.5218
